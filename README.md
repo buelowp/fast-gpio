@@ -1,26 +1,28 @@
 # fast-gpio
-Provides access to GPIOs by directly writing to the hw registers, implements sw PWM as well
+Based on the original Onion IoT fast-gpio binary implementation.
 
-# usage
+This is the library version of that, stripped down a bit.
 
-    fast-gpio set-input <gpio>
-    fast-gpio set-output <gpio>
-    fast-gpio get-direction <gpio>
-    fast-gpio read <gpio>
-    fast-gpio set <gpio> <value: 0 or 1>
-    fast-gpio pwm <gpio> <freq in Hz> <duty cycle percentage>
+# Using it with C++
+Build it, install to the toolchain path.
 
-## verbose output modes
+You link against -loniongpio
 
-Verbose flags available:
+The easiest usage is the following for a simple GPIO set/get
 
-* **-q** quite output
-* **-v** verbose output
-* **-u** ubus output
-* **-d** debug output
+```
+#include <iostream>
+#include <fastgpioomega2.h>
 
-Examples:
+int main() {
+	FastGpioOmega2 omega2;
 
-    fast-gpio -q set-input 5
-    fast-gpio -u read 5
-    > {"cmd":"Read", "pin":12, "val":"1"}
+	omega2.SetDirection(3, 1);
+	omega2.Set(3, 1);
+
+	std::cout << "Turned GPIO on" << std::endl;
+	return 0;
+}
+```
+
+More to come
