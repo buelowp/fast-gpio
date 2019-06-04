@@ -3,7 +3,10 @@
 
 #include <functional>
 
-#include <fastgpiotypes.>
+#include <signal.h>
+#include <sys/time.h>
+
+#include "fastgpiotypes.h"
 
 class FastIRQMetaData {
 public:
@@ -11,12 +14,14 @@ public:
 	{
 		m_type = GPIO_IRQ_NONE;
 		m_debounce = 0;
+		m_lastMillis = 0;
 	}
-	FastIRQMetaData(int t, unsigned long d, std::function<void()> cbk)
+	FastIRQMetaData(GPIO_Irq_Type t, unsigned long d, std::function<void()> cbk)
 	{
 		setType(t);
 		setDebounce(d);
 		setCallback(cbk);
+		m_lastMillis = 0;
 	}
 	~FastIRQMetaData();
 
@@ -26,12 +31,17 @@ public:
 	GPIO_Irq_Type type() { return m_type; }
 	void setType(GPIO_Irq_Type t) { m_type = t; }
 
-	unsigned long debounce() { return m_debounc; }
+	unsigned long debounce() { return m_debounce; }
 	void setDebounce(unsigned long d) { m_debounce = d; }
+
+	suseconds_t time() { return m_lastMillis; }
+	void setTime(suseconds_t m) { m_lastMillis = m; }
 
 private:
 	std::function<void()> m_callback;
 	GPIO_Irq_Type m_type;
 	unsigned long m_debounce;
+	suseconds_t m_lastMillis;
 };
+
 #endif

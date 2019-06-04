@@ -1,15 +1,10 @@
 #include <module.h>
 
-Module::Module(void)
+Module::Module()
 {
-	// not verbose by default
-	m_verbosityLevel = 0;
-
-	// not in debug mode by default
-	m_debuglevel = 0;
 }
 
-Module::~Module(void)
+Module::~Module()
 {
 }
 
@@ -17,25 +12,22 @@ int Module::setupAddress(unsigned long int blockBaseAddr, unsigned long int bloc
 {
 	int  m_mfd;
 	int page_size;
-	if (m_debuglevel == 0)
-	{
-		if ((m_mfd = open("/dev/mem", O_RDWR)) < 0)
-		{
-			ONION_ERROR("Unable to open /dev/mem: %d", errno)
+
+	if ((m_mfd = open("/dev/mem", O_RDWR)) < 0) {
+			onionPrint(ONION_SEVERITY_FATAL, "Unable to open /dev/mem: %d", errno);
 			return EXIT_FAILURE;	// maybe return -1
-		}
-		m_regAddress = (unsigned long int*)mmap(NULL,
+	}
+
+	m_regAddress = (unsigned long int*)mmap(NULL,
 												1024, 
 												PROT_READ|PROT_WRITE, 
 												MAP_FILE|MAP_SHARED, 
 												m_mfd, 
 												blockBaseAddr);
-		close(m_mfd);
-		if (m_regAddress == MAP_FAILED)
-		{
-			ONION_ERROR("Error mapping GPIO memory: %d", errno);
-			return EXIT_FAILURE;	// maybe return -2
-		}
+	close(m_mfd);
+	if (m_regAddress == MAP_FAILED)	{
+		onionPrint(ONION_SEVERITY_FATAL, "Error mapping GPIO memory: %d", errno);
+		return EXIT_FAILURE;	// maybe return -2
 	}
 
 	return EXIT_SUCCESS;	// m_regAddress is now populated
@@ -43,7 +35,7 @@ int Module::setupAddress(unsigned long int blockBaseAddr, unsigned long int bloc
 
 void Module::writeReg(unsigned long int registerOffset, unsigned long int value)
 {
-	ONION_DEBUG("Writing register 0x%08lx with data 0x%08lx \n", (m_regAddress + registerOffset), value);
+	onionPrint(ONION_SEVERITY_DEBUG, "Writing register 0x%08lx with data 0x%08lx \n", (m_regAddress + registerOffset), value);
 
 	*(m_regAddress + registerOffset) = value;
 }
@@ -54,7 +46,7 @@ unsigned long int Module::readReg(unsigned long int registerOffset)
 	// read the value 
 	value = *(m_regAddress + registerOffset);
 
-	ONION_DEBUG("Read register 0x%08lx, data: 0x%08lx \n", (m_regAddress + registerOffset), value);
+	onionPrint(ONION_SEVERITY_DEBUG, "Read register 0x%08lx, data: 0x%08lx \n", (m_regAddress + registerOffset), value);
 
 	return(value);
 }

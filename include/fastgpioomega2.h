@@ -3,7 +3,9 @@
 
 #include <functional>
 #include <signal.h>
-#include "fastgpio.h"
+
+#include "module.h"
+#include "fastgpiotypes.h"
 
 
 //Define Macros in derived class. 
@@ -45,24 +47,25 @@
 //GPIO_DCLR_2 10000648(GPIO64-95)
 #define REGISTER_DCLR2_OFFSET		402
 
-class FastGpioOmega2 : protected FastGpio {
+class FastGpioOmega2 : public Module {
 public:
-	FastGpioOmega2(void);
-	~FastGpioOmega2(void);
+	FastGpioOmega2(int);
+	~FastGpioOmega2();
 
-	int setDirection(int, GPIO_Pin_Direction);
-	int getDirection(int, GPIO_Pin_Direction&);
+	void setDirection(GPIO_Pin_Direction);
+	GPIO_Pin_Direction getDirection();
 
-	int set(int, GPIO_Pin_State);
-	int read(int, GPIO_Pin_State&);
+	void set(GPIO_Pin_State);
+	GPIO_Pin_State get();
 
 private:
-	void setGpioOffset(int);	/* Populates the offset private members above depending on selected GPIO */
-
 	int	m_ctrlOffset;
 	int	m_dataOffset;
 	int m_dataSetOffset;
 	int m_dataClrOffset;
+	int m_pin;
+	int m_gpio;
+	int m_offset;
 };
 
 
