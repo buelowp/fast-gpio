@@ -9,36 +9,22 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-
-
-
-
 class Module {
 public:
 	Module(void);
 	~Module(void);
 
-	void 	SetVerbosity	(int input);
-	void 	SetVerbosity	(bool input);
-
-	void	SetDebugMode	(int input);
-	void	SetDebugMode	(bool input);
-
-
 protected:
 	// protected functions
-	int 				_SetupAddress	(unsigned long int blockBaseAddr, unsigned long int blockSize);
-	void 				_WriteReg 		(unsigned long int registerOffset, unsigned long int value);
-	unsigned long int 	_ReadReg 		(unsigned long int registerOffset);
+	int stupAddress(unsigned long int, unsigned long int);
+	void writeReg(unsigned long int, unsigned long int);
+	unsigned long int readReg(unsigned long int);
 	
-	void 				_SetBit			(unsigned long int &regVal, int bitNum, int value);
-	int 				_GetBit			(unsigned long int regVal, int bitNum);
+	void setBit(unsigned long int&, int, int);
+	int getBit(unsigned long int, int);
 
-	// protected members
-	int				verbosityLevel;
-	int 			debugLevel;
-
-	unsigned long int *regAddress;
+private:
+	unsigned long int *m_regAddress;
 };
 
 #endif 	// _MODULE_H_

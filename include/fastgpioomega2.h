@@ -1,7 +1,10 @@
 #ifndef _FAST_GPIO_OMEGA2_H_
 #define _FAST_GPIO_OMEGA2_H_
 
-#include <fastgpio.h>
+#include <functional>
+#include <signal.h>
+#include "fastgpio.h"
+
 
 //Define Macros in derived class. 
 #define REG_BLOCK_ADDR			0x10000000
@@ -42,25 +45,24 @@
 //GPIO_DCLR_2 10000648(GPIO64-95)
 #define REGISTER_DCLR2_OFFSET		402
 
-class FastGpioOmega2 : public FastGpio {
+class FastGpioOmega2 : protected FastGpio {
 public:
 	FastGpioOmega2(void);
 	~FastGpioOmega2(void);
 
-	int 	SetDirection	(int pinNum, int bOutput);
-	int 	GetDirection 	(int pinNum, int &bOutput);
+	int setDirection(int, GPIO_Pin_Direction);
+	int getDirection(int, GPIO_Pin_Direction&);
 
-	int 	Set 			(int pinNum, int value);
-	int 	Read 			(int pinNum, int &value);
+	int set(int, GPIO_Pin_State);
+	int read(int, GPIO_Pin_State&);
 
 private:
-	// private functions
-	int 	pinNumber;
-	int		ctrlOffset;
-	int		dataOffset;
-	int 	dataSetOffset;
-	int 	dataClrOffset;
-	void setGpioOffset(int gpio);//Populates the offset private members above depending on selected GPIO
+	void setGpioOffset(int);	/* Populates the offset private members above depending on selected GPIO */
+
+	int	m_ctrlOffset;
+	int	m_dataOffset;
+	int m_dataSetOffset;
+	int m_dataClrOffset;
 };
 
 
