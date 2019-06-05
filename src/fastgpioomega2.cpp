@@ -46,7 +46,7 @@ void FastGpioOmega2::setDirection(GPIO_Pin_Direction dir)
 	writeReg(m_ctrlOffset, regVal);
 }
 
-GPIO_Pin_Direction FastGpioOmega2::getDirection()
+GPIO_Pin_Direction FastGpioOmega2::direction()
 {
 	unsigned long int regVal;
 
@@ -57,7 +57,7 @@ GPIO_Pin_Direction FastGpioOmega2::getDirection()
 	return static_cast<GPIO_Pin_Direction>(getBit(regVal, m_gpio));
 }
 
-void FastGpioOmega2::set(GPIO_Pin_State value)
+void FastGpioOmega2::setValue(GPIO_Pin_State value)
 {
 	unsigned long int regAddr;
 	unsigned long int regVal;
@@ -78,7 +78,7 @@ void FastGpioOmega2::set(GPIO_Pin_State value)
 	writeReg (regAddr, regVal);
 }
 
-GPIO_Pin_State FastGpioOmega2::get()
+GPIO_Pin_State FastGpioOmega2::value()
 {
 	unsigned long int regVal = readReg(m_dataOffset);
 

@@ -4,7 +4,7 @@
 #include <functional>
 #include <signal.h>
 
-#include "module.h"
+#include "fastgpio.h"
 #include "fastgpiotypes.h"
 
 
@@ -47,23 +47,22 @@
 //GPIO_DCLR_2 10000648(GPIO64-95)
 #define REGISTER_DCLR2_OFFSET		402
 
-class FastGpioOmega2 : public Module {
+class FastGpioOmega2 : public FastGPIO {
 public:
 	FastGpioOmega2(int);
 	~FastGpioOmega2();
 
-	void setDirection(GPIO_Pin_Direction);
-	GPIO_Pin_Direction getDirection();
+	void setDirection(GPIO_Pin_Direction) override;
+	GPIO_Pin_Direction direction() override;
 
-	void set(GPIO_Pin_State);
-	GPIO_Pin_State get();
+	void setValue(GPIO_Pin_State) override;
+	GPIO_Pin_State value() override;
 
 private:
 	int	m_ctrlOffset;
 	int	m_dataOffset;
 	int m_dataSetOffset;
 	int m_dataClrOffset;
-	int m_pin;
 	int m_gpio;
 	int m_offset;
 };

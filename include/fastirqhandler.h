@@ -18,6 +18,7 @@
 
 #include "fastgpiotypes.h"
 #include "fastirqmetadata.h"
+#include "fastgpio.h"
 
 #ifndef SIG_GPIO_IRQ
   #define SIG_GPIO_IRQ 42
@@ -29,35 +30,37 @@
  */
 class FastIRQHandler {
 public:
-	bool set(int, GPIO_Irq_Type, std::function<void()>);		// Pin and Rise/Fall, debounce set to 0
-	bool set(int, unsigned long, GPIO_Irq_Type, std::function<void()>); // Pin, debouce value, Rise/Fall
+	bool set(FastGPIO*, GPIO_Irq_Type, std::function<void()>);		// Pin and Rise/Fall, debounce set to 0
+	bool set(FastGPIO*, unsigned long, GPIO_Irq_Type, std::function<void()>); // Pin, debouce value, Rise/Fall
 	int clear(int);					// Turn IRQ off for pin
 	int interruptsActive() { return m_metadata.size(); }
+	bool enabled() { return m_enabled; }
+	FastIRQMetaData* findMetaData(int);
+	bool checkDebounce(FastIRQMetaData*);
 
-	FastIRQHandler* instance()
+	static FastIRQHandler* instance()
 	{
-		if (!m_instance)
-			m_instance = new FastIRQHandler();
+		static FastIRQHandler instance;
 
-		return m_instance;
+		return &instance;
 	}
+
+    sigset_t m_sigset;
+    siginfo_t m_siginfo;
 
 private:
 	FastIRQHandler();
 	~FastIRQHandler();
+	FastIRQHandler& operator=(FastIRQHandler const&) {};
+	FastIRQHandler(FastIRQHandler&);
 
 	void enable();
-	bool checkDebounce(FastIRQMetaData*);
     void run();
-    static void irqHandler(int, siginfo_t*, void*);
 
 	std::map<int, FastIRQMetaData*> m_metadata;
 	std::mutex m_mutex;
 	std::thread *m_thread;
-    sigset_t m_sigset;
-    siginfo_t m_siginfo;
 	bool m_enabled;
-
-	FastIRQHandler *m_instance;
+	int m_pin;
 };
 #endif

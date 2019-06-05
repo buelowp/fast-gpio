@@ -1,14 +1,14 @@
-#include <module.h>
+#include <fastgpio.h>
 
-Module::Module()
+FastGPIO::FastGPIO()
 {
 }
 
-Module::~Module()
+FastGPIO::~FastGPIO()
 {
 }
 
-int Module::setupAddress(unsigned long int blockBaseAddr, unsigned long int blockSize)
+int FastGPIO::setupAddress(unsigned long int blockBaseAddr, unsigned long int blockSize)
 {
 	int  m_mfd;
 	int page_size;
@@ -33,14 +33,14 @@ int Module::setupAddress(unsigned long int blockBaseAddr, unsigned long int bloc
 	return EXIT_SUCCESS;	// m_regAddress is now populated
 }
 
-void Module::writeReg(unsigned long int registerOffset, unsigned long int value)
+void FastGPIO::writeReg(unsigned long int registerOffset, unsigned long int value)
 {
 	onionPrint(ONION_SEVERITY_DEBUG, "Writing register 0x%08lx with data 0x%08lx \n", (m_regAddress + registerOffset), value);
 
 	*(m_regAddress + registerOffset) = value;
 }
 
-unsigned long int Module::readReg(unsigned long int registerOffset)
+unsigned long int FastGPIO::readReg(unsigned long int registerOffset)
 {
 	unsigned long int 	value = 0x0;
 	// read the value 
@@ -52,7 +52,7 @@ unsigned long int Module::readReg(unsigned long int registerOffset)
 }
 
 // change the value of a single bit
-void Module::setBit(unsigned long int &regVal, int bitNum, int value)
+void FastGPIO::setBit(unsigned long int &regVal, int bitNum, int value)
 {
 	if (value == 1) {
 		regVal |= (1 << bitNum);
@@ -66,7 +66,7 @@ void Module::setBit(unsigned long int &regVal, int bitNum, int value)
 }
 
 // find the value of a single bit
-int Module::getBit(unsigned long int regVal, int bitNum)
+int FastGPIO::getBit(unsigned long int regVal, int bitNum)
 {
 	int value;
 
