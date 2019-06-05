@@ -1,30 +1,48 @@
+/*
+ * Fast GPIO Library for the Onion.io Omega2+ board
+ * Copyright (C) 2019  Peter Buelow <goballstate at gmail>
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <fastgpioomega2.h>
 
-FastGpioOmega2::FastGpioOmega2(int pin)
+FastGpioOmega2::FastGpioOmega2(int pin) : FastGPIO(pin)
 {
-	setupAddress(REG_BLOCK_ADDR, REG_BLOCK_SIZE);
-	m_pin = pin;
-	m_gpio = m_pin % 32;
-	m_offset = m_pin / 32;
+	setupAddress(OMEGA2_REG_BLOCK_ADDR, OMEGA2_REG_BLOCK_SIZE);
+	m_gpio = pin % 32;
+	m_offset = pin / 32;
 
 	switch (m_offset) {
 	case 0:
-		this->m_ctrlOffset = REGISTER_CTRL0_OFFSET;
-		this->m_dataOffset = REGISTER_DATA0_OFFSET;
-		this->m_dataSetOffset = REGISTER_DSET0_OFFSET;
-		this->m_dataClrOffset = REGISTER_DCLR0_OFFSET;
+		this->m_ctrlOffset = OMEGA2_REGISTER_CTRL0_OFFSET;
+		this->m_dataOffset = OMEGA2_REGISTER_DATA0_OFFSET;
+		this->m_dataSetOffset = OMEGA2_REGISTER_DSET0_OFFSET;
+		this->m_dataClrOffset = OMEGA2_REGISTER_DCLR0_OFFSET;
 		break;
 	case 1:
-		this->m_ctrlOffset = REGISTER_CTRL1_OFFSET;
-		this->m_dataOffset = REGISTER_DATA1_OFFSET;
-		this->m_dataSetOffset = REGISTER_DSET1_OFFSET;
-		this->m_dataClrOffset = REGISTER_DCLR1_OFFSET;
+		this->m_ctrlOffset = OMEGA2_REGISTER_CTRL1_OFFSET;
+		this->m_dataOffset = OMEGA2_REGISTER_DATA1_OFFSET;
+		this->m_dataSetOffset = OMEGA2_REGISTER_DSET1_OFFSET;
+		this->m_dataClrOffset = OMEGA2_REGISTER_DCLR1_OFFSET;
 		break;
 	default:
-		this->m_ctrlOffset = REGISTER_CTRL2_OFFSET;
-		this->m_dataOffset = REGISTER_DATA2_OFFSET;
-		this->m_dataSetOffset = REGISTER_DSET2_OFFSET;
-		this->m_dataClrOffset = REGISTER_DCLR2_OFFSET;
+		this->m_ctrlOffset = OMEGA2_REGISTER_CTRL2_OFFSET;
+		this->m_dataOffset = OMEGA2_REGISTER_DATA2_OFFSET;
+		this->m_dataSetOffset = OMEGA2_REGISTER_DSET2_OFFSET;
+		this->m_dataClrOffset = OMEGA2_REGISTER_DCLR2_OFFSET;
 		break;
 	}
 }
