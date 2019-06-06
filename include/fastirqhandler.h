@@ -55,13 +55,13 @@ public:
 	int clear(int);					// Turn IRQ off for pin
 	int interruptsActive() { return m_metadata.size(); }
 	bool enabled() { return m_enabled; }
+	void setEnabled(bool e) { m_enabled = e; }
 	FastGPIO* findPin(int);
 	bool checkDebounce(FastGPIO*);
 	void start();
     void stop();
-    
     void run();
-    
+
 	static FastIRQHandler* instance()
 	{
 		static FastIRQHandler instance;

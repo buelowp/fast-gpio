@@ -35,7 +35,7 @@ void FastIRQHandler::run()
         onionPrint(ONION_SEVERITY_DEBUG, "Added pollfd entry %d, fd %d\n", index, it->second->fd());
     }
 
-    while (FastIRQHandler::instance()->enabled()) {
+    while (m_enabled) {
         if ((pollrc = poll(fds, index, 100)) < 0) {
             if (errno == EINTR)
                 continue;
