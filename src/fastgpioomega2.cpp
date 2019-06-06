@@ -54,11 +54,11 @@ FastGpioOmega2::~FastGpioOmega2()
 void FastGpioOmega2::setDirection(GPIO_Pin_Direction dir)
 {
 	unsigned long int regVal = readReg(m_ctrlOffset);
-	onionPrint(ONION_SEVERITY_DEBUG, "Direction setting read: 0x%08lx\n", regVal);
+	onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Direction setting read: 0x%08lx\n", __FUNCTION__, __LINE__, regVal);
 
 	// set the OE for this pin
 	setBit(regVal, m_gpio, static_cast<int>(dir));
-	onionPrint(ONION_SEVERITY_DEBUG, "Direction setting write: 0x%08lx\n", regVal);
+	onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Direction setting write: 0x%08lx\n", __FUNCTION__, __LINE__, regVal);
 
 	// write the new register value
 	writeReg(m_ctrlOffset, regVal);
@@ -70,7 +70,7 @@ GPIO_Pin_Direction FastGpioOmega2::direction()
 
 	// read the current input and output settings
 	regVal 	= readReg(m_ctrlOffset);
-	onionPrint(ONION_SEVERITY_DEBUG, "Direction setting read: 0x%08lx\n", regVal);
+	onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Direction setting read: 0x%08lx\n", __FUNCTION__, __LINE__, regVal);
 
 	return static_cast<GPIO_Pin_Direction>(getBit(regVal, m_gpio));
 }

@@ -38,7 +38,7 @@ int FastGPIO::setupAddress(unsigned long int blockBaseAddr, unsigned long int bl
 	int page_size;
 
 	if ((m_mfd = open("/dev/mem", O_RDWR)) < 0) {
-			onionPrint(ONION_SEVERITY_FATAL, "Unable to open /dev/mem: %d", errno);
+			onionPrint(ONION_SEVERITY_FATAL, "open(/dev/mem): %s(%d)\n", strerror(errno));
 			return EXIT_FAILURE;	// maybe return -1
 	}
 
@@ -50,7 +50,7 @@ int FastGPIO::setupAddress(unsigned long int blockBaseAddr, unsigned long int bl
 												blockBaseAddr);
 	close(m_mfd);
 	if (m_regAddress == MAP_FAILED)	{
-		onionPrint(ONION_SEVERITY_FATAL, "Error mapping GPIO memory: %d", errno);
+		onionPrint(ONION_SEVERITY_FATAL, "mmap: %s(%d)\n", strerror(errno), errno);
 		return EXIT_FAILURE;	// maybe return -2
 	}
 
@@ -59,7 +59,7 @@ int FastGPIO::setupAddress(unsigned long int blockBaseAddr, unsigned long int bl
 
 void FastGPIO::writeReg(unsigned long int registerOffset, unsigned long int value)
 {
-	onionPrint(ONION_SEVERITY_DEBUG, "Writing register 0x%08lx with data 0x%08lx \n", (m_regAddress + registerOffset), value);
+	onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Writing register 0x%08lx with data 0x%08lx\n", __FUNCTION__, __LINE__, (m_regAddress + registerOffset), value);
 
 	*(m_regAddress + registerOffset) = value;
 }
@@ -70,29 +70,25 @@ unsigned long int FastGPIO::readReg(unsigned long int registerOffset)
 	// read the value 
 	value = *(m_regAddress + registerOffset);
 
-	onionPrint(ONION_SEVERITY_DEBUG, "Read register 0x%08lx, data: 0x%08lx \n", (m_regAddress + registerOffset), value);
+	onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Read register 0x%08lx, data: 0x%08lx \n", __FUNCTION__, __LINE__, (m_regAddress + registerOffset), value);
 
 	return(value);
 }
 
 // change the value of a single bit
-void FastGPIO::setBit(unsigned long int &regVal, int bitNum, int value)
+void FastGPIO::setBit(unsigned long int &regval, int bitnum, int value)
 {
+    onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Set bit %d of register 0x%08lx to %d\n", __FUNCTION__, __LINE__, bitnum, regval, value); 
 	if (value == 1) {
-		regVal |= (1 << bitNum);
+		regval |= (1 << bitnum);
 	}
 	else {
-		regVal &= ~(1 << bitNum);
+		regval &= ~(1 << bitnum);
 	}
 }
 
 // find the value of a single bit
 int FastGPIO::getBit(unsigned long int regVal, int bitNum)
 {
-	int value;
-
-	// isolate the specific bit
-	value = ((regVal >> bitNum) & 0x1);
-
-	return (value);
+	return ((regVal >> bitNum) & 0x1);
 }

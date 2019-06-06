@@ -26,13 +26,13 @@ void FastIRQHandler::run()
     int index = 0;
     int pollrc = 0;
     
-    onionPrint(ONION_SEVERITY_DEBUG, "Adding %d entries to the poll function\n", m_metadata.size());
+    onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Adding %d entries to the poll function\n", __FUNCTION__, __LINE__, m_metadata.size());
     for (std::map<int,FastGPIO*>::iterator it = m_metadata.begin(); it != m_metadata.end(); ++it) {
         fds[index].fd = it->second->fd();
 		fds[index].events = POLLPRI;
         active.insert(std::pair<int, FastGPIO*>(it->second->fd(), it->second));
+        onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Added pollfd entry %d, fd %d\n", __FUNCTION__, __LINE__, index, it->second->fd());
         index++;
-        onionPrint(ONION_SEVERITY_DEBUG, "Added pollfd entry %d, fd %d\n", index, it->second->fd());
     }
 
     while (m_enabled) {
@@ -40,7 +40,7 @@ void FastIRQHandler::run()
             if (errno == EINTR)
                 continue;
             else {
-                onionPrint(ONION_SEVERITY_FATAL, "poll failed: %d\n", errno);
+                onionPrint(ONION_SEVERITY_FATAL, "poll: %s(%d)\n", strerror(errno), errno);
                 m_enabled = false;
                 return;
             }
@@ -52,7 +52,7 @@ void FastIRQHandler::run()
                     if (it != active.end()) {
                         std::function<void()> func = it->second->callback();
                         try {
-                            onionPrint(ONION_SEVERITY_DEBUG, "Executing callback for pin %d\n", it->second->pin());
+                            onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Executing callback for pin %d\n", __FUNCTION__, __LINE__, it->second->pin());
                             if (checkDebounce(&(*it->second)))
                                 func();
                         }
@@ -65,7 +65,7 @@ void FastIRQHandler::run()
             }
         }
         else {
-            continue;
+            continue;   // Poll returned timeout to check if still enabled
         }
     }
 }
@@ -93,6 +93,7 @@ FastGPIO* FastIRQHandler::findPin(int pin)
 		return &(*it->second);
 	}
 
+	onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Pin %d cannot be found\n", __FUNCTION__, __LINE__, pin);
 	return nullptr;
 }
 
@@ -101,7 +102,7 @@ int FastIRQHandler::clear(int pin)
 	std::lock_guard<std::mutex> guard(m_mutex);
 
 	if (m_metadata.find(pin) == m_metadata.end()) {
-		onionPrint(ONION_SEVERITY_DEBUG, "Pin %d is not active\n", pin);
+		onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Pin %d is not active\n", __FUNCTION__, __LINE__, pin);
 		return m_metadata.size();
 	}
 
@@ -155,13 +156,13 @@ bool FastIRQHandler::exportPin(int pin)
     
     if ((fd = open("/sys/class/gpio/export", O_WRONLY)) > 0) {
 		sprintf(buf, "%d", pin);
-		onionPrint(ONION_SEVERITY_DEBUG, "Writing %s to /sys/class/gpio/export\n", buf);
+		onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Writing %s to /sys/class/gpio/export\n", buf);
 		if (write(fd, buf, strlen(buf) + 1) < 0) {
             if (errno == 16) {
-                onionPrint(ONION_SEVERITY_DEBUG, "Pin %d has been exported, assuming control\n", pin);
+                onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Pin %d has been exported, assuming control\n", __FUNCTION__, __LINE__, pin);
             }
             else {
-                onionPrint(ONION_SEVERITY_FATAL, "Error writing %s to export: %s(%d)\n", buf, strerror(errno), errno);
+                onionPrint(ONION_SEVERITY_FATAL, "write (%s): %s(%d)\n", buf, strerror(errno), errno);
                 close(fd);
                 return false;
             }
@@ -183,9 +184,9 @@ bool FastIRQHandler::unexportPin(int pin)
     gpioEdge(pin, GPIO_IRQ_NONE);
     if ((fd = open("/sys/class/gpio/unexport", O_WRONLY)) > 0) {
 		sprintf(buf, "%d", pin);
-		onionPrint(ONION_SEVERITY_DEBUG, "Writing %s to /sys/class/gpio/unexport\n", buf);
+		onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Writing %s to /sys/class/gpio/unexport\n", __FUNCTION__, __LINE__, buf);
 		if (write(fd, buf, strlen(buf) + 1) < 0) {
-			onionPrint(ONION_SEVERITY_FATAL, "Error writing pin to export\n", errno);
+			onionPrint(ONION_SEVERITY_FATAL, "write (/sys/class/gpio/unexport): %s(%d)\n", strerror(errno), errno);
 			close(fd);
 			return false;
 		}
@@ -199,7 +200,7 @@ int FastIRQHandler::gpioValue(int pin)
     char path[256];
     
     sprintf(path, "/sys/class/gpio/gpio%d/value", pin);
-    onionPrint(ONION_SEVERITY_DEBUG, "Opening %s\n", path);
+    onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Opening %s\n", __FUNCTION__, __LINE__, path);
     return open(path, O_RDONLY | O_NONBLOCK);
 }
 
@@ -210,12 +211,12 @@ bool FastIRQHandler::set(FastGPIO *pin)
 	std::lock_guard<std::mutex> guard(m_mutex);
 
 	if (pin->direction() != GPIO_DIRECTION_IN) {
-		onionPrint(ONION_SEVERITY_DEBUG, "Pin is set as output, cannot continue\n");
+		onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Pin is set as output, cannot continue\n", __FUNCTION__, __LINE__);
 		return false;
 	}
 
 	if (m_metadata.find(pin->pin()) != m_metadata.end()) {
-		onionPrint(ONION_SEVERITY_DEBUG, "Pin %d is already active, cancel first\n", pin);
+		onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Pin %d is already active, cancel first\n", __FUNCTION__, __LINE__, pin);
 		return false;
 	}
 
@@ -242,12 +243,12 @@ void FastIRQHandler::start()
 {
     std::thread(run);
     m_enabled = true;
-    onionPrint(ONION_SEVERITY_DEBUG, "Enabling IRQ Handler\n");
+    onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Enabling IRQ Handler\n", __FUNCTION__, __LINE__);
 }
 
 void FastIRQHandler::stop()
 {
     m_enabled = false;
-    onionPrint(ONION_SEVERITY_DEBUG, "Disabling IRQ Handler\n");
+    onionPrint(ONION_SEVERITY_DEBUG, "%s:%d: Disabling IRQ Handler\n", __FUNCTION__, __LINE__);
 }
 
